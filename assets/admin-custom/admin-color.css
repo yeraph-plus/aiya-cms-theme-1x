@@ -1,0 +1,51 @@
+body {
+    background: var(--aya-body-bg);
+    color: var(--aya-body-color);
+}
+
+.wp-core-ui .button-link,
+a {
+    color: var(--aya-link-color);
+}
+
+.wp-core-ui .button-link:active,
+.wp-core-ui .button-link:focus,
+.wp-core-ui .button-link:hover,
+a:active,
+a:focus,
+a:hover {
+    color: var(--aya-link-hover-color);
+}
+
+#post-body #visibility:before,
+#post-body .misc-pub-post-status:before,
+#post-body .misc-pub-revisions:before,
+.curtime #timestamp:before,
+span.wp-media-buttons-icon:before {
+    color: currentColor
+}
+
+.column-author img, .column-comment .comment-author img, .column-username img,
+#wpadminbar #wp-admin-bar-my-account.with-avatar .ab-empty-item img, #wpadminbar #wp-admin-bar-my-account.with-avatar a img,
+#wpadminbar #wp-admin-bar-user-info .avatar ,
+#activity-widget #the-comment-list .avatar {
+    border-radius: 50%;
+}
+
+.media-modal .delete-attachment,
+.media-modal .trash-attachment,
+.media-modal .untrash-attachment,
+.wp-core-ui .button-link-delete {
+    color: #a00
+}
+
+.media-modal .delete-attachment:focus,
+.media-modal .delete-attachment:hover,
+.media-modal .trash-attachment:focus,
+.media-modal .trash-attachment:hover,
+.media-modal .untrash-attachment:focus,
+.media-modal .untrash-attachment:hover,
+.wp-core-ui .button-link-delete:focus,
+.wp-core-ui .button-link-delete:hover {
+    color: #dc3232
+}

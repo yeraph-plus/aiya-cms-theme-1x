@@ -7,10 +7,11 @@
  * 
  */
 
-if ( post_password_required() )
+if (post_password_required()){
     return;
+}
 ?>
-<div id="comments" class="comments-area">
+<div id="comments" class="comments-area card p-3 mb-2">
     <div class="layoutSingleColumn">
         <?php if ( have_comments() ) : ?>
             <h3 class="comments-title"><i class="bi bi-filter me-2"></i>评论<small>(<?php echo number_format_i18n( get_comments_number() );?>)</small></h3>

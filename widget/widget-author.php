@@ -1,91 +1,98 @@
 <?php
 
-//自定义小工具：作者信息
+//小工具：作者信息
 
-class widget_author extends WP_Widget {
+class Aya_Author_Box extends WP_Widget {
+
+    //小工具信息
     function __construct() {
-        parent::__construct('author_show', 'AiYa-CMS-作者信息', array('description' => '该工具只在文章页面侧栏有效'));
-    }
-    function widget($args, $instance) {
-        extract($args);
-        $title = apply_filters('widget_title',esc_attr($instance['title']));
-        $limit = strip_tags($instance['limit']) ? strip_tags($instance['limit']) : 5;
-
-
-        $author_id = get_the_author_meta( 'ID' );
-
-        echo '
-        <div class="author_show_box">
-            <div class="author_show_head">
-                '.get_avatar( $author_id, 80).'
-                <h3>'.get_the_author_meta('display_name').'</h3>
-                <p>'.get_the_author_meta('description').'</p>
-            </div>
-            <div class="author_show_info">
-                <span><i class="bi bi-book"></i><b>文章</b>'.count_user_posts($author_id).'</span>
-                <span><i class="bi bi-chat-square-dots"></i><b>评论</b>'.get_comments('count=true&user_id='.$author_id).'</span>
-            </div>
-
-        ';
-        echo '<ul class="author_post">';
-
-        query_posts('author__in='.$author_id.'&posts_per_page='.$limit.'&ignore_sticky_posts=1'); while (have_posts()) : the_post();  ?>
-
-
-        <li>
-            <?php
-            if ( has_post_thumbnail() ) {
-                the_post_thumbnail(array(400, 280, true));
-            } else {
-                echo wp_get_attachment_image(get_theme_mod('aya_nopic'), array(400, 280, true));
-            }
-            ?>
-            <div class="author_title">
-                <h4><a class="stretched-link" href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h4>
-                <p><?php echo get_comments_number() ?>条留言</p>
-            </div>
-        </li>
-
-    <?php
-        endwhile; wp_reset_query();
-
-        echo '</ul></div>';
+        $widget_options = array (
+            'classname' => 'widget-post-box',
+            'description' => '该工具只在文章页面侧栏有效'
+        );
+        parent::__construct( 'author_box', 'AiYa-CMS-作者信息' , $widget_options);
     }
 
+    //选项表单
+    function form( $instance ) {
+        $default = array(
+            'limit' => '3',
+            'mobile_hide' => '0'
+        );
+        $limit = isset($instance['limit']) ? $instance['limit'] : $default['limit'];
+        $mobile_hide = isset($instance['mobile_hide']) ? $instance['mobile_hide'] : $default['mobile_hide'];
+        ?>
+            <p>
+                <label for="<?php echo $this->get_field_id('limit'); ?>">显示作者文章数量:</label>
+                <input class="widefat" id="<?php echo $this->get_field_id('limit'); ?>" name="<?php echo $this->get_field_name('limit'); ?>"  type="text" value="<?php echo $limit; ?>" />
+            </p>
+            <p>
+                <label for="<?php echo $this->get_field_id('mobile_hide'); ?>">移动端显示设置：</label>
+                <select class="widefat" id="<?php echo $this->get_field_id('mobile_hide'); ?>" name="<?php echo $this->get_field_name('mobile_hide'); ?>" >
+                    <option value="1" <?php echo ($mobile_hide == 1 ? 'selected="selected"' : ''); ?>>显示</option>
+                    <option value="0" <?php echo ($mobile_hide == 0 ? 'selected="selected"' : ''); ?>>不显示</option>
+                </select>
+            </p>
+        <?php
+    }
 
-
-    function update($new_instance, $old_instance) {
-        if (!isset($new_instance['submit'])) {
-            return false;
-        }
+    //保存设置
+    function update($new_instance, $old_instance){
         $instance = $old_instance;
-        $instance['title'] = strip_tags($new_instance['title']);
+
         $instance['limit'] = strip_tags($new_instance['limit']);
+        $instance['mobile_hide'] = strip_tags($new_instance['mobile_hide']);
+
         return $instance;
     }
 
+    //主函数
+    function widget($args, $instance) {
+        extract($args);
+		$limit = isset($instance['limit']) ? $instance['limit'] : 3;
+        $mobile_hide = isset($instance['mobile_hide']) && $instance['mobile_hide'] == 1 ? 'mobile-hide' : '';
+        //判断是否为移动端
+        if(wp_is_mobile() && $instance['mobile_hide'] == '0'){
+            return '';
+        }
+        //开始生成HTML
+        echo $before_widget;
+        echo '<div class="widget-card card p-2 mb-2 '.$mobile_hide.'">';
+        $author = get_the_author_meta( 'ID' );
+        echo '<div class="author-info">
+                '.get_avatar( $author, 80).'
+                <h5 class="name">'.get_the_author_meta('display_name').'</h5>
+                <p class="des">'.get_the_author_meta('description').'</p>
+                <p class="mate">
+                    <span><i class="bi bi-book"></i>&nbsp;文章&nbsp;'.count_user_posts($author).'</span>
+                    <span><i class="bi bi-chat-dots"></i>&nbsp;评论&nbsp;'.get_comments('count=true&user_id='.$author).'</span>
+                </p>
+            </div>';
+        $args = array(
+            'author__in' => $author,
+            'ignore_sticky_posts' => true,
+            'posts_per_page' => $limit,
+            'paged'	=> '1',
+            'post_type' => 'post'
+        );
+        $the_query = new WP_Query($args);
+        //生成文章列表
+        if($the_query->have_posts()){
+            echo '<ul class="widget-loop-li p-0 m-0">';
+            while ($the_query->have_posts()) : $the_query->the_post();
+            echo '<li>
+                    <img loading="lazy" src="'.get_post_thumb().'" >
+                    <div class="loop">
+                        <h5><a class="stretched-link" href="'.get_permalink().'">'.get_post_title().'</a></h5>
+                        <p><i class="bi bi-clock"></i>&nbsp;'.get_the_date().'</p>
+                    </div>
+                </li>';
+            endwhile;
+            wp_reset_query();//重置Query查询
+            echo '</ul>';
 
-
-    function form($instance) {
-        global $wpdb;
-        $instance = wp_parse_args((array) $instance, array('title'=> '', 'limit' => ''));
-        $title = esc_attr($instance['title']);
-        $limit = strip_tags($instance['limit']);
-        ?>
-        <p>
-            <label for="<?php echo $this->get_field_id('title'); ?>">标题：<input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo $title; ?>" /></label>
-        </p>
-        <p>
-            <label for="<?php echo $this->get_field_id('limit'); ?>">文章数量：<input class="widefat" id="<?php echo $this->get_field_id('limit'); ?>" name="<?php echo $this->get_field_name('limit'); ?>" type="text" value="<?php echo $limit; ?>" /></label>
-        </p>
-        <input type="hidden" id="<?php echo $this->get_field_id('submit'); ?>" name="<?php echo $this->get_field_name('submit'); ?>" value="1" />
-        <?php
+        echo '</div>';
+        echo $after_widget;
+        }
     }
-}
-
-
-
-add_action('widgets_init', 'widget_author_init');
-function widget_author_init() {
-    register_widget('widget_author');
 }

@@ -7,7 +7,7 @@
  * @version 1.0.0
  *
  */
-if( ! class_exists( 'CSF_Field_background' ) ) {
+if ( ! class_exists( 'CSF_Field_background' ) ) {
   class CSF_Field_background extends CSF_Fields {
 
     public function __construct( $field, $value = '', $unique = '', $where = '', $parent = '' ) {
@@ -31,9 +31,15 @@ if( ! class_exists( 'CSF_Field_background' ) ) {
         'background_gradient_direction' => true,
         'background_image_preview'      => true,
         'background_auto_attributes'    => false,
+        'compact'                       => false,
         'background_image_library'      => 'image',
-        'background_image_placeholder'  => esc_html__( 'No background selected', 'csf' ),
+        'background_image_placeholder'  => esc_html__( 'Not selected', 'csf' ),
       ) );
+
+      if ( $args['compact'] ) {
+        $args['background_color']           = false;
+        $args['background_auto_attributes'] = true;
+      }
 
       $default_value                    = array(
         'background-color'              => '',
@@ -59,7 +65,7 @@ if( ! class_exists( 'CSF_Field_background' ) ) {
 
       //
       // Background Color
-      if( ! empty( $args['background_color'] ) ) {
+      if ( ! empty( $args['background_color'] ) ) {
 
         echo '<div class="csf--color">';
 
@@ -77,7 +83,7 @@ if( ! class_exists( 'CSF_Field_background' ) ) {
 
       //
       // Background Gradient Color
-      if( ! empty( $args['background_gradient_color'] ) && ! empty( $args['background_gradient'] ) ) {
+      if ( ! empty( $args['background_gradient_color'] ) && ! empty( $args['background_gradient'] ) ) {
 
         echo '<div class="csf--color">';
 
@@ -95,7 +101,7 @@ if( ! class_exists( 'CSF_Field_background' ) ) {
 
       //
       // Background Gradient Direction
-      if( ! empty( $args['background_gradient_direction'] ) && ! empty( $args['background_gradient'] ) ) {
+      if ( ! empty( $args['background_gradient_direction'] ) && ! empty( $args['background_gradient'] ) ) {
 
         echo '<div class="csf--color">';
 
@@ -121,7 +127,7 @@ if( ! class_exists( 'CSF_Field_background' ) ) {
 
       //
       // Background Image
-      if( ! empty( $args['background_image'] ) ) {
+      if ( ! empty( $args['background_image'] ) ) {
 
         echo '<div class="csf--background-image">';
 
@@ -142,11 +148,11 @@ if( ! class_exists( 'CSF_Field_background' ) ) {
       $auto_class   = ( ! empty( $args['background_auto_attributes'] ) ) ? ' csf--auto-attributes' : '';
       $hidden_class = ( ! empty( $args['background_auto_attributes'] ) && empty( $this->value['background-image']['url'] ) ) ? ' csf--attributes-hidden' : '';
 
-      echo '<div class="csf--background-attributes'. $auto_class . $hidden_class .'">';
+      echo '<div class="csf--background-attributes'. esc_attr( $auto_class . $hidden_class ) .'">';
 
       //
       // Background Position
-      if( ! empty( $args['background_position'] ) ) {
+      if ( ! empty( $args['background_position'] ) ) {
 
         CSF::field( array(
           'id'              => 'background-position',
@@ -169,7 +175,7 @@ if( ! class_exists( 'CSF_Field_background' ) ) {
 
       //
       // Background Repeat
-      if( ! empty( $args['background_repeat'] ) ) {
+      if ( ! empty( $args['background_repeat'] ) ) {
 
         CSF::field( array(
           'id'          => 'background-repeat',
@@ -187,7 +193,7 @@ if( ! class_exists( 'CSF_Field_background' ) ) {
 
       //
       // Background Attachment
-      if( ! empty( $args['background_attachment'] ) ) {
+      if ( ! empty( $args['background_attachment'] ) ) {
 
         CSF::field( array(
           'id'       => 'background-attachment',
@@ -203,7 +209,7 @@ if( ! class_exists( 'CSF_Field_background' ) ) {
 
       //
       // Background Size
-      if( ! empty( $args['background_size'] ) ) {
+      if ( ! empty( $args['background_size'] ) ) {
 
         CSF::field( array(
           'id'        => 'background-size',
@@ -212,6 +218,7 @@ if( ! class_exists( 'CSF_Field_background' ) ) {
             ''        => esc_html__( 'Background Size', 'csf' ),
             'cover'   => esc_html__( 'Cover', 'csf' ),
             'contain' => esc_html__( 'Contain', 'csf' ),
+            'auto'    => esc_html__( 'Auto', 'csf' ),
           ),
         ), $this->value['background-size'], $this->field_name(), 'field/background' );
 
@@ -219,7 +226,7 @@ if( ! class_exists( 'CSF_Field_background' ) ) {
 
       //
       // Background Origin
-      if( ! empty( $args['background_origin'] ) ) {
+      if ( ! empty( $args['background_origin'] ) ) {
 
         CSF::field( array(
           'id'            => 'background-origin',
@@ -236,7 +243,7 @@ if( ! class_exists( 'CSF_Field_background' ) ) {
 
       //
       // Background Clip
-      if( ! empty( $args['background_clip'] ) ) {
+      if ( ! empty( $args['background_clip'] ) ) {
 
         CSF::field( array(
           'id'            => 'background-clip',
@@ -253,7 +260,7 @@ if( ! class_exists( 'CSF_Field_background' ) ) {
 
       //
       // Background Blend Mode
-      if( ! empty( $args['background_blend_mode'] ) ) {
+      if ( ! empty( $args['background_blend_mode'] ) ) {
 
         CSF::field( array(
           'id'            => 'background-blend-mode',
@@ -295,30 +302,31 @@ if( ! class_exists( 'CSF_Field_background' ) ) {
       $background_image        = ( ! empty( $this->value['background-image']['url']       ) ) ? $this->value['background-image']['url']       : '';
 
 
-      if( $background_color && $background_gd_color ) {
+      if ( $background_color && $background_gd_color ) {
         $gd_direction   = ( $background_gd_direction ) ? $background_gd_direction .',' : '';
         $bg_image[] = 'linear-gradient('. $gd_direction . $background_color .','. $background_gd_color .')';
+        unset( $this->value['background-color'] );
       }
 
-      if( $background_image ) {
+      if ( $background_image ) {
         $bg_image[] = 'url('. $background_image .')';
       }
 
-      if( ! empty( $bg_image ) ) {
+      if ( ! empty( $bg_image ) ) {
         $output .= 'background-image:'. implode( ',', $bg_image ) . $important .';';
       }
 
       // Common background properties
       $properties = array( 'color', 'position', 'repeat', 'attachment', 'size', 'origin', 'clip', 'blend-mode' );
 
-      foreach( $properties as $property ) {
+      foreach ( $properties as $property ) {
         $property = 'background-'. $property;
-        if( ! empty( $this->value[$property] ) ) {
+        if ( ! empty( $this->value[$property] ) ) {
           $output .= $property .':'. $this->value[$property] . $important .';';
         }
       }
 
-      if( $output ) {
+      if ( $output ) {
         $output = $element .'{'. $output .'}';
       }
 

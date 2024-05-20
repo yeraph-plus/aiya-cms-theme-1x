@@ -1,0 +1,30 @@
+#hello-hitokoto {
+    text-align: right;
+    float: right;
+    padding: 5px 10px;
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.6666;
+}
+
+.ltr #hello-hitokoto {
+    float: left;
+}
+
+.block-editor-page #hello-hitokoto {
+    display: none;
+}
+
+@media screen and (max-width:782px) {
+
+    #hello-hitokoto,
+    .rtl #hello-hitokoto {
+        float: none;
+        padding-left: 0;
+        padding-right: 0;
+    }
+}
+
+#ssid {
+    width: 50px;
+}

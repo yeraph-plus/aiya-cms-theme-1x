@@ -8,48 +8,27 @@
  * E.g., it puts together the home page when no home.php file exists.
  * 
  */
+
+
 get_header(); ?>
-
-<section class="index_banner">
+<!--banner-->
+<?php do_action('aya_index_banner'); ?>
+<!--main-->
+<section class="index-main py-3">
     <div class="container">
-        <div class="row g-3">
-<?php echo aya_option('aya_basic'); ?>
-        </div>
-    </div>
-</section>
-
-
-<section class="index_area">
-    <div class="container">
+        <!--custom-loop-->
+        <?php do_action('aya_index_custom'); ?>
         <div class="row g-3">
             <div class="col-lg-9">
-                <div class="post_box">
-                    <?php while( have_posts() ): the_post(); 
-                        if ( has_post_format( 'gallery' )) {
-                            get_template_part( 'template-parts/loop', 'gallery' );
-                        } else if  ( has_post_format( 'image' )) { 
-                            get_template_part( 'template-parts/loop', 'image' );
-                        } else{ 
-                            //标准 
-                            get_template_part( 'template-parts/loop', 'default' );
-                        } 
-                    endwhile; ?>
-                </div>
-                <?php get_posts_nav(); ?>
+                <!--loop-->
+                <?php loop_layout(); ?>
             </div>
-            <?php get_sidebar() ?>
+            <div class="col-lg-3">
+                <!--sidebar-->
+                <?php get_sidebar(); ?>
+            </div>
         </div>
     </div>
 </section>
-
-<?php /*
-<section class="links mobile_none">
-    <div class="container">
-        <span>友情链接：</span>
-        <?php wp_list_bookmarks( 'title_li=&categorize=0&before=&after=' ); ?>
-    </div>
-</section>
-*/ ?>
-<?php 
-
-get_footer(); ?>
+<?php do_action('aya_index_after'); ?>
+<?php get_footer(); ?>

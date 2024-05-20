@@ -1,19 +1,21 @@
-<div class="post_images post_loop">
-    <?php
-    if ( has_post_thumbnail() ) {
-        the_post_thumbnail(array(920, 400, true));
-    } else {
-        echo wp_get_attachment_image(get_theme_mod('aya_nopic'), array(920, 400, true));
-    }
-    ?>
-    <div class="post_images_foot">
-        <h2><a class="stretched-link" href="<?php the_permalink(); ?>" title="<?php the_title(); ?>"><?php the_title(); ?></a></h2>
-        <p><?php echo wp_trim_words( get_the_content(), 150 ); ?></p>
-        <div class="post_info">
-            <div class="post_info_l">
-                <span><i class="bi bi-text-left"></i><?php the_category(', ') ?></span>
-                <span><i class="bi bi-clock"></i><?php the_time('Y.m.d'); ?></span>
-                <span><i class="bi bi-eye"></i><?php post_views('',''); ?>人浏览</span>
+<div class="post-loop mb-2">
+    <div class="post-card post-image card p-2">
+        <div class="post-thumb">
+            <img loading="lazy" src="<?php echo get_post_thumb(0, 800, 400); ?>">
+        </div>
+        <div class="post-info">
+            <div class="post-title pb-1">
+                <a href="<?php the_permalink(); ?>" title="<?php the_title_attribute(); ?>"><?php the_post_title(); ?></a>
+            </div>
+            <div class="post-tag py-1">
+                <em class="cat"><i class="bi bi-list"></i> <?php the_category(', '); ?></em>
+                <?php the_tags( '<em><i class="bi bi-hash"></i>', '</em><em><i class="bi bi-hash"></i>', '</em>' ); ?>
+            </div>
+            <div class="post-words py-1">
+                <?php the_post_preview(); ?>
+            </div>
+            <div class="post-meta pt-2">
+                <?php the_post_meta(); ?>
             </div>
         </div>
     </div>

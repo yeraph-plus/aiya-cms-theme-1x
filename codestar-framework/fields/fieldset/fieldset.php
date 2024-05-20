@@ -7,7 +7,7 @@
  * @version 1.0.0
  *
  */
-if( ! class_exists( 'CSF_Field_fieldset' ) ) {
+if ( ! class_exists( 'CSF_Field_fieldset' ) ) {
   class CSF_Field_fieldset extends CSF_Fields {
 
     public function __construct( $field, $value = '', $unique = '', $where = '', $parent = '' ) {
@@ -18,7 +18,7 @@ if( ! class_exists( 'CSF_Field_fieldset' ) ) {
 
       echo $this->field_before();
 
-      echo '<div class="csf-fieldset-content">';
+      echo '<div class="csf-fieldset-content" data-depend-id="'. esc_attr( $this->field['id'] ) .'">';
 
       foreach ( $this->field['fields'] as $field ) {
 

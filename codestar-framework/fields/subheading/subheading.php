@@ -7,7 +7,7 @@
  * @version 1.0.0
  *
  */
-if( ! class_exists( 'CSF_Field_subheading' ) ) {
+if ( ! class_exists( 'CSF_Field_subheading' ) ) {
   class CSF_Field_subheading extends CSF_Fields {
 
     public function __construct( $field, $value = '', $unique = '', $where = '', $parent = '' ) {

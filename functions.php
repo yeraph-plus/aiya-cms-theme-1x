@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Twenty Sixteen functions and definitions
  *
@@ -22,30 +23,31 @@
  *
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	die( 'Invalid request.' );
+if (!defined('ABSPATH')){
+    die('Invalid request.');
 }
 
-if ( version_compare( $GLOBALS['wp_version'], '5.6-alpha', '<' ) ) {
-	wp_die('请升级WordPress到5.6以上版本');
+if (version_compare($GLOBALS['wp_version'], '5.6', '<')){
+    wp_die('请升级WordPress到5.6以上版本');
 }
+
+if (!class_exists('Classic_Editor')){ 
+   echo '<div id="message" class=" notice is-dismissible notice-info"><p>经典编辑器未启用。</p></div>';
+}
+
 /*
  * ------------------------------------------------------------------------------
- * 加载外置程序
+ * 加载CodeStar-Framework
  * ------------------------------------------------------------------------------
  */
 
 //加载codestar后台设置框架
-require get_template_directory(). '/codestar-framework/codestar-framework.php';
-//加载framework设置项
-require get_template_directory(). '/codestar-framework/codestar-framework-path.php'; 
+require get_template_directory() . '/codestar-framework/codestar-framework.php';
 
-//预定义类
-//thumbnails.class.php//裁剪核心
-//update-checker.class.php//检查更新插件
-//decode.class.php//加密解密类
-//qrcode.class.php//二维码生成
-//recaptcha.class.php//验证码核心
+//加载framework设置项
+require get_template_directory() . '/codestar-framework/codestar-framework-path-1.php';
+require get_template_directory() . '/codestar-framework/codestar-framework-path-2.php';
+require get_template_directory() . '/codestar-framework/codestar-framework-path-3.php';
 
 /*
  * ------------------------------------------------------------------------------
@@ -53,41 +55,137 @@ require get_template_directory(). '/codestar-framework/codestar-framework-path.p
  * ------------------------------------------------------------------------------
  */
 
-//注册主题css及js
-function css_js_add_scripts(){
-    wp_register_style( 'bootstrap', get_template_directory_uri() . '/assets/css/bootstrap.min.css' );
-    wp_enqueue_style( 'bootstrap' );
-    wp_register_style( 'bifont', get_template_directory_uri() . '/assets/bifont/bootstrap-icons.css' );
-    wp_enqueue_style( 'bifont' );
-    wp_register_style( 'stylecss', get_template_directory_uri() . '/style.css' );
-    wp_enqueue_style( 'stylecss' );
-    wp_register_script( 'jquery-min', get_template_directory_uri() . '/assets/js/jquery.min.js', array(), '', false ); //false就在页头显示
-    wp_enqueue_script( 'jquery-min' );
-    wp_register_script( 'bootstrap', get_template_directory_uri() . '/assets/js/bootstrap.min.js', array(), '', true );
-    wp_enqueue_script( 'bootstrap' );
-    wp_register_script( 'mainjs', get_template_directory_uri() . '/assets/js/main.js', array(), '', true );
-    wp_enqueue_script( 'mainjs' );
+//获取主题版本
+function aya_get_theme_version(){
+    $theme = wp_get_theme();
+    return $theme->get('Version');
 }
-add_action('wp_enqueue_scripts', 'css_js_add_scripts');
 
-//注册导航菜单
-    register_nav_menus(
+//注册主题功能
+function aya_theme_setup(){
+	//注册多语言文本文件
+    //load_theme_textdomain( '_','/languages' );
+    //支持自动 Feed 链接
+	add_theme_support('automatic-feed-links');
+    //注册缩略图支持
+    add_theme_support('post-thumbnails',
         array(
-        'main'     => __( '顶部菜单' ),
-        'footnav'  => __( '底部菜单' )
+            'post',
+            'page',
         )
     );
-
-//自定义文章形式 增加 图片 和 图库
-    add_theme_support(
-        'post-formats', array(
+    //支持标签
+	add_theme_support('title-tag');
+    //自定义文章类型
+    add_theme_support('post-formats',
+        array(
             'gallery',
             'image',
-            'video',
-            'audio'
         )
     );
-//注册说说文章类型
+    //注册导航菜单
+    register_nav_menus(
+        array(
+            'header-menu' => ('顶部菜单'),
+            'footer-menu' => ('底部菜单'),
+            'widget-menu' => ('小工具菜单'),
+        )
+    );
+}
+add_action('after_setup_theme', 'aya_theme_setup');
+
+//注册主题css及js
+function css_js_add_scripts(){
+    //获取主题版本
+    $theme_ver = aya_get_theme_version();
+
+    //配置静态资源版本
+    $jquery_ver = '3.6.1';
+    $bootstrap_ver = '5.2.3';
+    $icons_ver = '1.10.3';
+
+    //获取主题设置
+    $type_cdn = aya_option('js_cdn_type');
+
+    //加载静态文件
+    if($type_cdn = aya_magic('0') || $type_cdn == null){
+        //jquery.js
+        wp_register_script('jquery-bundle', get_template_directory_uri(). '/assets/jquery/jquery.min.js', array(), $jquery_ver, true); //false就在页头加载
+        //bootstrap
+        wp_register_script('bootstrap', get_template_directory_uri(). '/assets/bootstrap/js/bootstrap.min.js', array(), $bootstrap_ver, true);
+        wp_register_script('bootstrap-bundle', get_template_directory_uri(). '/assets/bootstrap/js/bootstrap.bundle.min.js', array(), $bootstrap_ver, true);
+        wp_register_style('bootstrap', get_template_directory_uri(). '/assets/bootstrap/css/bootstrap.min.css', array(), $bootstrap_ver, 'all');
+        wp_register_style('bifont', get_template_directory_uri(). '/assets/bootstrap-icons/bootstrap-icons.css', array(), $icons_ver, 'all');
+    }
+    elseif($type_cdn = '1'){
+        wp_register_script('jquery-bundle', '//cdn.staticfile.org/jquery/'.$jquery_ver.'/jquery.min.js', array(), $jquery_ver, true); 
+        wp_register_script('bootstrap', '//cdn.staticfile.org/bootstrap/'.$bootstrap_ver.'/js/bootstrap.min.js', array(), $bootstrap_ver, true);
+        wp_register_script('bootstrap-bundle', '//cdn.staticfile.org/bootstrap/'.$bootstrap_ver.'/js/bootstrap.bundle.min.js', array(), $bootstrap_ver, true);
+        wp_register_style('bootstrap', '//cdn.staticfile.org/bootstrap/'.$bootstrap_ver.'/css/bootstrap.min.css', array(), $bootstrap_ver, 'all');
+        wp_register_style('bifont', '//cdn.staticfile.org/bootstrap-icons/'.$icons_ver.'/font/bootstrap-icons.css', array(), $icons_ver, 'all');
+    }
+    elseif($type_cdn = '2'){
+        wp_register_script('jquery-bundle', '//cdn.jsdelivr.net/npm/jquery@'.$jquery_ver.'/dist/jquery.min.js', array(), $jquery_ver, true); 
+        wp_register_script('bootstrap', '//cdn.jsdelivr.net/npm/bootstrap@'.$bootstrap_ver.'/dist/js/bootstrap.min.js', array(), $bootstrap_ver, true);
+        wp_register_script('bootstrap-bundle', '//cdn.jsdelivr.net/npm/bootstrap@'.$bootstrap_ver.'/dist/js/bootstrap.bundle.min.js', array(), $bootstrap_ver, true);
+        wp_register_style('bootstrap', '//cdn.jsdelivr.net/npm/bootstrap@'.$bootstrap_ver.'/dist/css/bootstrap.min.css', array(), $bootstrap_ver, 'all');
+        wp_register_style('bifont', '//cdn.jsdelivr.net/npm/bootstrap-icons@'.$icons_ver.'/font/bootstrap-icons.css', array(), $icons_ver, 'all');
+    }
+    //fancybox.js
+    wp_register_script('fancybox', get_template_directory_uri(). '/assets/fancybox/fancybox.js', array(), '4.0.31', true);
+    wp_register_style('fancybox', get_template_directory_uri(). '/assets/fancybox/fancybox.min.css', array(), '4.0.31', 'all');
+    //highlight.js
+    wp_register_script('highlight', get_template_directory_uri(). '/assets/highlight/highlight.min.js', array(), '11.7.0', true);
+    wp_register_style('highlight', get_template_directory_uri(). '/assets/highlight/styles/atom-one-dark.min.css', array(), '11.7.0', 'all');
+    wp_register_script('highlight-num', get_template_directory_uri(). '/assets/highlight/highlightjs-line-numbers.min.js', array(), '1.0.0', true);
+    //player-loader
+    wp_register_script('hls', get_template_directory_uri(). '/assets/player-loader/hls.min.js', array(), '1.4.2', true);
+    wp_register_script('hls-light', get_template_directory_uri(). '/assets/player-loader/hls.light.min.js', array(), '1.4.2', true);
+    wp_register_script('meting', get_template_directory_uri(). '/assets/player-loader/Meting.min.js', array(), '2.0.1', true);
+    wp_register_script('dplayer', get_template_directory_uri(). '/assets/player-loader/DPlayer.min.js', array(), '1.27.1', true);
+    wp_register_style('aplayer', get_template_directory_uri(). '/assets/player-loader/APlayer.min.css', array(), '1.10.1', 'all');
+    wp_register_script('aplayer', get_template_directory_uri(). '/assets/player-loader/APlayer.min.js', array(), '1.10.1', true);
+    //主题文件
+    wp_register_script('qrcode', get_template_directory_uri(). '/assets/qrcode.min.js', array(), '1.0.0', true);
+    wp_register_script('main', get_template_directory_uri(). '/assets/main.min.js', array(), $theme_ver, true);
+    wp_register_style('style', get_template_directory_uri(). '/style.css', array(), $theme_ver, 'all');
+    wp_register_style('entry', get_template_directory_uri(). '/entry.css', array(), $theme_ver, 'all');
+    
+    //开始加载静态文件
+    wp_enqueue_style('bootstrap');
+    wp_enqueue_style('style');
+    wp_enqueue_style('bifont');
+
+    //加载JS组件
+    wp_enqueue_script('jquery-bundle');
+    wp_enqueue_script('main');
+
+    //加载AJAX位置
+    wp_localize_script('main', 'aya_ajax', array('url' => admin_url('admin-ajax.php')));
+    
+    if (aya_option('popper_js') == true) {
+        wp_enqueue_script('bootstrap-bundle');
+    }else{
+        wp_enqueue_script('bootstrap');
+    }
+
+    if (aya_option('fancybox_js') == true) {
+        wp_enqueue_style('fancybox');
+        wp_enqueue_script('fancybox');
+    }
+
+    //在文章页调用
+    if (is_single() || is_page()) {
+        wp_enqueue_style('entry');
+        wp_enqueue_script('qrcode');
+        if (aya_option('highlight_js') == true) {
+            wp_enqueue_style('highlight');
+            wp_enqueue_script('highlight');
+            wp_enqueue_script('highlight-num');
+        }
+    }
+}
+add_action('wp_enqueue_scripts', 'css_js_add_scripts');
 
 /*
  * ------------------------------------------------------------------------------
@@ -95,270 +193,40 @@ add_action('wp_enqueue_scripts', 'css_js_add_scripts');
  * ------------------------------------------------------------------------------
  */
 
-//首次启动函数
-require get_template_directory(). '/inc/functions-action.php';
-//后台功能函数
-require get_template_directory(). '/inc/functions-norm.php';
-//缩略图裁剪函数
-require get_template_directory(). '/inc/functions-thumbnails.php';
-//文章功能函数
-require get_template_directory(). '/inc/functions-single.php';
-//评论功能函数
-require get_template_directory(). '/inc/functions-comments.php';
-//邮件SMTP函数
-//require get_template_directory(). '/inc/functions-mail.php';
-//小工具
-require get_template_directory(). '/inc/functions-widget.php';
-//短代码
-//require get_template_directory(). '/inc/functions-shotcode.php';
+//WP优化组件
+require get_template_directory() . '/inc/functions-optimize.php';
+//主题功能
+require get_template_directory() . '/inc/functions-norm.php';
+//后台功能
+require get_template_directory() . '/inc/functions-admin.php';
+//用户功能
+require get_template_directory() . '/inc/functions-user.php';
+//SEO功能
+require get_template_directory() . '/inc/functions-seo.php';
+//自定义页面组件
+require get_template_directory() . '/inc/functions-custom.php';
+//文章功能
+require get_template_directory() . '/inc/functions-single.php';
+//LOOP模板
+require get_template_directory() . '/inc/functions-loop.php';
+//评论模板
+require get_template_directory() . '/inc/functions-comments.php';
+//邮件模板
+require get_template_directory() . '/inc/functions-email.php';
+//页面模板
+require get_template_directory() . '/inc/functions-template.php';
+//短代码组件
+require get_template_directory() . '/inc/functions-shotcode.php';
+//小工具组件
+require get_template_directory() . '/inc/functions-widget.php';
+//DEBUG组件
+//require get_template_directory() . '/inc/functions-debug.php';
 
 /*
  * ------------------------------------------------------------------------------
- * 核心功能函数
+ * 速效救心丸
  * ------------------------------------------------------------------------------
  */
 
-//列表循环翻页函数
-function get_posts_nav() {
-    $args = array(
-        'prev_next' => 1,
-        'before_page_number' => '',
-        'mid_size' => 1,
-        'prev_text' => __('上页'),
-        'next_text' => __('下页'),
-    );
-    if( aya_option('home_load' ) == 1){
-        echo '<div class="posts-nav">'.paginate_links($args).'</div>';
-    }else{
-        echo '<div class="post-read-more">'.get_next_posts_link('加载更多','').'</div>';
-    }
-}
-
-//文章访浏览量
-function record_visitors(){
-	if (is_singular()) {
-		global $post;
-		$post_ID = $post->ID;
-		if($post_ID){
-			$post_views = (int)get_post_meta($post_ID, 'views', true);
-			if(!update_post_meta($post_ID, 'views', ($post_views+1))) 
-			{
-				add_post_meta($post_ID, 'views', 1, true);
-			}
-		}
-	}
-}
-add_action('wp_head', 'record_visitors');  
-
-//文章访问计数器
-function post_views($before = '(点击 ', $after = ' 次)', $echo = 1){
-	global $post;
-	$post_ID = $post->ID;
-	$views = (int)get_post_meta($post_ID, 'views', true);
-	if ($echo) echo $before, number_format($views), $after;
-	else return $views;
-};
-
-//获取全站文章浏览量
-function aya_get_all_view() {
-    global $wpdb;
-    $count=0;
-    $views= $wpdb->get_results("SELECT * FROM $wpdb->postmeta WHERE meta_key='views'");
-    foreach($views as $key=>$value){
-        $meta_value=$value->meta_value;
-        if($meta_value!=' '){
-            $count+=(int)$meta_value;
-        }
-    }
-    return $count;
-}
-
-//获取当前分类一周文章数量
-function aya_get_category_week($input = '') {
-    global $wpdb;
-    if($input == '') {
-        $category = get_the_category();
-        return $category[0]->category_count;
-    }
-    elseif(is_numeric($input)) {
-        $SQL = "SELECT {$wpdb->term_taxonomy}.count FROM {$wpdb->terms},  {$wpdb->term_taxonomy} WHERE {$wpdb->terms}.term_id = {$wpdb->term_taxonomy}.term_id AND {$wpdb->term_taxonomy}.term_id = {$input}";
-        return $wpdb->get_var($SQL);
-    }
-    else {
-        $SQL = "SELECT {$wpdb->term_taxonomy}.count FROM {$wpdb->terms}, {$wpdb->term_taxonomy} WHERE {$wpdb->terms}.term_id = {$wpdb->term_taxonomy}.term_id AND {$wpdb->terms}.slug='{$input}'";
-        return $wpdb->get_var($SQL);
-    }
-}
-
-//取得一言
-function hitokoto(){
-    $data  = get_template_directory(). '/assets/hitokoto.json';
-    $json  = file_get_contents($data);
-    $array = json_decode($json, true);
-    $count = count($array);
-    if ($count != 0){
-        $hitokoto = $array[array_rand($array)]['hitokoto'];
-        echo $hitokoto;
-    }else{
-        echo '无法读取：<code>hitokoto.json</code>';
-    }
-
-}
-
-//中文附件上传
-function uazoh_wp_upload_filter($file){  
-    $time=date("YmdHis");  
-    $file['name'] = $time."".mt_rand(1,100).".".pathinfo($file['name'] , PATHINFO_EXTENSION);  
-    return $file;  
-}  
-add_filter('wp_handle_upload_prefilter', 'uazoh_wp_upload_filter'); 
-
-//页面伪静态
-function html_page_permalink(){
-    global $wp_rewrite;
-    if (!strpos($wp_rewrite->get_page_permastruct(), '.html')) {
-        $wp_rewrite->page_structure = $wp_rewrite->page_structure . '.html';
-    }
-}
-add_action('init', 'html_page_permalink', -1);
-
-//懒加载
-function aya_seo_lazyload($content){
-    if (!is_feed() || !is_robots()) {
-        $content = preg_replace('/<img(.+)src=[\'"]([^\'"]+)[\'"](.*)>/i', "<img\$1data-original=\"\$2\" \$3>\n<noscript>\$0</noscript>", $content);
-    }
-    return $content;
-}
-add_filter('the_content', 'aya_seo_lazyload');
-
-
-// WordPress获取分类和子分类文章数量
-function get_cat_postcount($id) {
-	// 获取当前分类信息
-	$cat = get_category($id);
-
-	// 当前分类文章数
-	$count = (int) $cat->count;
-
-	// 获取当前分类所有子分类
-	$tax_terms = get_terms('category', array('child_of' => $id));
-
-	foreach ($tax_terms as $tax_term) {
-		// 子分类文章数累加
-		$count +=$tax_term->count;
-	}
-	return $count;
-}
-
-//网站标题选择器
-function aya_site_title_type(){
-    $site_name = aya_option('site_name');
-    $site_des = aya_option('site_description');
-    $fgf = ' '.aya_option('title_fgf').' ';
-    
-    if ( is_home() || is_front_page() ) {
-        $paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
-        if ( $paged > 1 ) { $paged = $fgf.'第'.$paged.'页'; } else { $paged = '';};
-        $title = $site_name.$paged.$fgf.$site_des;
-    }
-    if ( is_single() || is_page() ) {
-        $title = ''.get_the_title().''.$fgf.$site_name;
-    }
-    if ( is_category() ) {
-        $paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
-        if ( $paged > 1 ) { $paged = $fgf.'第'.$paged.'页'; } else { $paged = '';};
-        $title = '分类 '.single_cat_title('',false).' 的文章'.$paged.$fgf.$site_name;
-    }
-    if ( is_tag() ) {
-        $paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
-        if ( $paged > 1 ) { $paged = $fgf.'第'.$paged.'页'; } else { $paged = '';};
-        $title = '标签 '.single_tag_title('#',false).' 的文章'.$paged.$fgf.$site_name;
-    }
-    if ( is_author() ) {
-        $title = '「'.get_the_author().'」的个人主页'.$fgf.$site_name;
-    }
-    if ( is_search() ) {
-        $paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
-        if ( $paged > 1 ) { $paged = $fgf.'第'.$paged.'页'; } else { $paged = '';};
-        $title = '搜索 '.get_query_var('s').' 的结果'.$paged.$fgf.$site_name;
-    }
-    if ( is_404() ) {
-        $title = '404 NOT FOUND'.$fgf.$site_name;
-    }
-    return $title;
-}
-
-
-//SEO关键词
-function aya_add_seo_keywords(){
-    $keywords = aya_option('seo_keywords');
-
-    if ( is_home() || is_front_page() ) {
-        $keywords = $keywords;
-    } 
-    if ( is_single() || is_page() ) {
-        $tags = get_the_tags();
-        if ( $tags ) { 
-            foreach ( $tags as $tag ) {
-                $keywords = $tag->name . ','.$keywords;
-            } 
-        }
-    }
-    if ( is_category() ) { 
-        $keywords = single_cat_title('',false).$keywords; 
-    }
-    if ( is_tag() ) { 
-        $keywords = single_tag_title('',false).$keywords; 
-    } 
-    if ( is_search() ) { 
-        $keywords = get_query_var('s'); 
-    } 
-    return $keywords;
-}
-
-//SEO描述
-function aya_add_seo_description(){
-    $description = aya_option('seo_description');
-
-    if ( is_home() || is_front_page() ) { 
-        $description = $description; 
-    } 
-    if ( is_single() || is_page() ) { 
-		$description = wp_trim_words( get_the_content(), 150, '...' );
-    } 
-    if ( is_category() ) { 
-        $description = '分类 '.single_cat_title('',false).' 的文章'; 
-    } 
-    if ( is_tag() ) { 
-        $description = '标签 '.single_tag_title('',false).' 的文章'; 
-    } 
-    if ( is_search() ) { 
-        $description = '搜索 '.get_query_var('s').' 的结果'; 
-    }
-    return $description;
-
-}
-
-function aya_add_css_mod(){
-    if( aya_option('dark_mod') == true){
-        $css = '';
-
-    }
-    if( aya_option('gray_mod') == true){
-        $css = '
-        html {
-            -webkit-filter: grayscale(100%);
-            -moz-filter: grayscale(100%);
-            -ms-filter: grayscale(100%);
-            -o-filter: grayscale(100%);
-            filter: grayscale(100%);
-            filter: progid:DXImageTransform.Microsoft.BasicImage(grayscale=1);
-        }
-        ';
-    }
-    if( aya_option('snow_mod') == true){
-        $css = '';
-
-    }
-    return $css;
-}
+//处理空格
+//require get_template_directory().'/inc/whitespace-fix.php';

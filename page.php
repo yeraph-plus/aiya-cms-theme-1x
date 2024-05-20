@@ -8,27 +8,39 @@
  * 
  */
 
-get_header();?>
-
-<section class="index_area">
+get_header(); ?>
+<section class="index-single py-3">
     <div class="container">
         <div class="row g-3">
             <div class="col-lg-9">
-                <div class="post_container_title">
-                    <h1><?php the_title(); ?></h1>
+                <!--page-->
+                <div class="content-area card p-3 mb-2">
+                    <h1 class="single-title pb-2">
+                        <?php the_post_title(); ?>
+                    </h1>
+                    <div class="single-article py-3 border-top">
+                        <article class="entry-main">
+                            <?php
+                            while (have_posts()) : the_post();
+                                the_content();
+                            endwhile;
+                            ?>
+                        </article>
+                    </div>
                 </div>
-                <div class="post_container mb-4">
-                    <?php while( have_posts() ): the_post(); $p_id = get_the_ID(); ?>
-                    <article class="wznrys">
-                    <?php the_content(); ?>
-                    </article>
-                    <?php endwhile; ?>
-                </div>
+                <!--comments-->
+                <?php 
+                if (comments_open() || get_comments_number()){
+                    //输出
+                    comments_template();
+                } 
+                ?>
             </div>
-            <?php get_sidebar() ?>
+            <div class="col-lg-3">
+                <!--sidebar-->
+                <?php get_sidebar(); ?>
+            </div>
         </div>
     </div>
 </section>
-<?php 
-
-get_footer(); ?>
+<?php get_footer();?>

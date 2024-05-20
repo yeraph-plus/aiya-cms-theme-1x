@@ -1,0 +1,102 @@
+body.login {
+    background:url('.$bing_image.');
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#login {
+    background: rgb(255 255 255 / 74%);
+    padding: 10px 10px 20px 10px
+}
+
+#login h1 {
+    display: none !important;
+}
+
+#login form {
+    border: none;
+    box-shadow: none;
+    background: none;
+    padding-bottom: 0px;
+}
+
+#login form p {
+    margin-bottom: 5px;
+}
+
+#login form p .input {
+    margin-top: 5px;
+}
+
+#login form .forgetmenot {
+    width: 100%;
+}
+
+#login form p.submit {
+    width: 100%;
+    margin-top: 20px;
+}
+
+#login form p #wp-submit {
+    width: 100%;
+    height: 42px;
+    background: #58b3e8;
+    border: none;
+    box-shadow: none;
+    text-shadow: none;
+}
+
+#login form p #wp-submit:hover {
+    background: #58b3e8;
+}
+
+#login form p.forgetmenot {
+    display: block;
+    padding-bottom: 20px;
+}
+
+#login form .clear {
+    display: none !important;
+}
+
+#login #nav {}
+
+#login #nav a {
+    margin: 0px 10px;
+}
+
+#login .message {
+    display: none;
+}
+
+#login #login_error,
+#login .success {
+    border: none;
+    box-shadow: none;
+    color: #fd1616;
+    font-weight: 300;
+    margin-bottom: 0px;
+    background: none;
+    padding: 30px 30px 0px 30px;
+}
+
+#reg_passmail {
+    display: none;
+}
+
+.language-switcher {
+    display: none !important;
+}
+
+@media (max-width:768px) {
+    body.login {
+        background: #fff;
+    }
+
+    #login {
+        width: 100%;
+        padding: 30px;
+        margin: 0px;
+    }
+}
